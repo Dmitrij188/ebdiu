@@ -15,7 +15,7 @@ const assistantInput = document.getElementById('assistantInput');
 const assistantChips = document.getElementById('assistantChips');
 const lessonHistoryContainer = document.getElementById('lessonHistory');
 
-const lessonHistory = [];
+let lessonHistory = [];
 
 function scrollToBottom(container) {
   container.scrollTop = container.scrollHeight;
@@ -43,14 +43,16 @@ function renderHistory() {
     item.className = 'history-item';
     item.dataset.code = lesson.code;
     item.textContent = lesson.title;
-    item.addEventListener('click', () => openLessonPage(lesson.code, lesson.title));
     lessonHistoryContainer.appendChild(item);
   });
 }
 
-function addLessonToHistory(lesson) {
-  if (lessonHistory.some((item) => item.code === lesson.code)) return;
-  lessonHistory.push(lesson);
+function addLessonToHistory(code, title) {
+  if (!code) return;
+  const exists = lessonHistory.some((item) => item.code === code);
+  if (exists) return;
+
+  lessonHistory = [...lessonHistory, { code, title }];
   renderHistory();
 }
 
@@ -65,7 +67,7 @@ function openLessonPage(code, title = `Урок ${code}`) {
     lessonWindow.document.close();
   }
 
-  addLessonToHistory({ code, title: pageTitle });
+  addLessonToHistory(code, pageTitle);
 }
 
 function renderDate(dateText) {
@@ -91,10 +93,10 @@ function seedSmallConversation() {
     sender: 'assistant',
     time: '10:02',
     text: `По вашему запросу подобраны следующие извлечённые уроки, которые соответствуют теме Внедрение технологий 5С в АО АСЭ<ol>
-        <li><strong>Название извлеченного урока</strong><br>Описание<br><a href="#" class="lesson-link" data-code="Q1230">Ссылка</a></li>
-        <li><strong>Название извлеченного урока</strong><br>Описание<br><a href="#" class="lesson-link" data-code="W0234">Ссылка</a></li>
-        <li><strong>Название извлеченного урока</strong><br>Описание<br><a href="#" class="lesson-link" data-code="E1034">Ссылка</a></li>
-        <li><strong>Название извлеченного урока</strong><br>Описание<br><a href="#" class="lesson-link" data-code="R1204">Ссылка</a></li>
+        <li><strong>Название извлеченного урока</strong><br>Описание<br><a href="#" class="lesson-link" data-code="Q1230">Урок Q1230</a></li>
+        <li><strong>Название извлеченного урока</strong><br>Описание<br><a href="#" class="lesson-link" data-code="W0234">Урок W0234</a></li>
+        <li><strong>Название извлеченного урока</strong><br>Описание<br><a href="#" class="lesson-link" data-code="E1034">Урок E1034</a></li>
+        <li><strong>Название извлеченного урока</strong><br>Описание<br><a href="#" class="lesson-link" data-code="R1204">Урок R1204</a></li>
       </ol>`,
   });
 }
@@ -178,11 +180,29 @@ function handleLessonLink(event) {
   event.preventDefault();
   const code = link.dataset.code;
   if (!code) return;
-  const title = link.dataset.title || `Урок ${code}`;
-  openLessonPage(code, title);
+  const title = `Урок ${code}`;
+  const win = window.open('', '_blank');
+  if (win) {
+    win.document.write(`<h1>${title}</h1><p>Текст: ${title}</p>`);
+    win.document.close();
+  }
+  addLessonToHistory(code, title);
 }
 
 assistantMessages?.addEventListener('click', handleLessonLink);
 messages?.addEventListener('click', handleLessonLink);
+
+lessonHistoryContainer?.addEventListener('click', (event) => {
+  const item = event.target.closest('.history-item');
+  if (!item) return;
+  const code = item.dataset.code;
+  if (!code) return;
+  const title = `Урок ${code}`;
+  const win = window.open('', '_blank');
+  if (win) {
+    win.document.write(`<h1>${title}</h1><p>Текст: ${title}</p>`);
+    win.document.close();
+  }
+});
 
 seedSmallConversation();
