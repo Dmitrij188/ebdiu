@@ -202,6 +202,9 @@ body {
 .composer input,
 .assistant-composer input {
   flex: 1;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 12px 14px;
   border-radius: 12px;
   border: 1px solid #dfe3eb;
@@ -435,12 +438,10 @@ body {
 }
 
 .assistant-composer {
+  display: flex;
+  align-items: center;
   justify-content: flex-end;
   padding: 0;
-}
-
-.assistant-composer input {
-  max-width: 420px;
 }
 
 @media (max-width: 1024px) {
